@@ -1,3 +1,5 @@
+#THIS TEST has some build errors
+
 data_type = Float32
 
 using Mocha
@@ -37,10 +39,10 @@ data_layer = MemoryDataLayer(batch_size=50,
 
 hidden_layers = map(1:n_hidden_layer) do i
   InnerProductLayer(name="ip$i", output_dim=n_hidden_unit, neuron=Neurons.ReLU(),
-      tops=[symbol("ip$i")], bottoms=[i == 1 ? :data : symbol("ip$(i-1)")])
+      tops=[Symbol("ip$i")], bottoms=[i == 1 ? :data : Symbol("ip$(i-1)")])
 end
 pred_layer = InnerProductLayer(name="pred", output_dim=d,
-    tops=[:pred], bottoms=[symbol("ip$n_hidden_layer")])
+    tops=[:pred], bottoms=[Symbol("ip$n_hidden_layer")])
 if test_wasserstein
   softmax_layer = SoftmaxLayer(bottoms=[:pred], tops=[:softpred])
   loss_layer = WassersteinLossLayer(bottoms=[:softpred, :label],
@@ -57,10 +59,10 @@ net = Net("Training", backend, [data_layer, common_layers..., loss_layer])
 method = SGD()
 params = make_solver_parameters(method, max_iter=10000,
                                 lr_policy=LRPolicy.Fixed(0.01), mom_policy=MomPolicy.Fixed(0.9))
-solver = Solver(method, params)
+#olver = Solver(method, params)
 add_coffee_break(solver, TrainingSummary(), every_n_iter=100)
 
-# for simplicity, we just use the training data as test...
+#for simplicity, we just use the training data as test...
 data_layer_test = MemoryDataLayer(batch_size=100, data=Array[X, Y_onehot])
 acc_layer = AccuracyLayer(bottoms=[:softpred, :label])
 test_layers = [data_layer_test, common_layers..., acc_layer]
